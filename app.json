@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Horta 4.0",
+    "slug": "horta4-0",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#00875f"
+    },
+    "plugins": [
+      "expo-status-bar",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permita o acesso à câmera para escanear os QR Codes das etiquetas das hortas."
+        }
+      ]
+    ],
+    "android": {
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
+    },
+    "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "Permita o acesso à câmera para escanear os QR Codes das etiquetas das hortas."
+      }
+    }
+  }
+}

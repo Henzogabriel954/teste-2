@@ -7,276 +7,277 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  Linking,
-  Platform,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-
-// Lista dos fornecedores reais com descrição e endereço cadastrado
-export const listaFornecedores = [
-  {
-    id: 'emerson',
-    nome: 'Hortifruti Primavera (Emerson Amorim)',
-    tipo: 'Horta Familiar / Orgânica',
-    local: 'Gleba Primavera, Estrada das Três Figueiras - Ibiporã / PR',
-    contato: '43 99967-0744',
-    responsavel: 'Emerson Amorim',
-    area: '5.000 m²',
-    produtos: ['Alface', 'Tomate', 'Pepino', 'Pimentão', 'Abobrinha'],
-    coordenadas: { latitude: -23.3085, longitude: -51.1650 },
-    imagemCapa: require('../assets/hortaEmerson/lotepedeAlface.jpeg'),
-  },
-  {
-    id: 'kawai',
-    nome: 'Recanto Kawai (Tadao e Marlene)',
-    tipo: 'Horta Familiar / Morangos Agroecológicos',
-    local: 'Rua Sibipiruna, Condomínio Itaúna - Ibiporã / PR',
-    contato: '43 99941-2196',
-    responsavel: 'Alcides Tadao Kuriki / Marlene Kobayasi',
-    area: '3 Estufas de Cultivo',
-    produtos: ['Morango'],
-    coordenadas: { latitude: -23.3130, longitude: -51.1600 },
-    imagemCapa: require('../assets/hortaEmerson/morango.jpeg'),
-  },
-];
+import { Ionicons } from '@expo/vector-icons';
+import COLORS from './theme/colors';
+import HeaderBar from './components/HeaderBar';
+import FORNECEDORES from './services/fornecedoresData';
 
 export default function CatalogoFornecedoresScreen({ navigation }) {
   const [busca, setBusca] = useState('');
+  const [categoriaAtiva, setCategoriaAtiva] = useState('Todos');
 
-  // Filtra por nome, local/endereço ou produto
-  const fornecedoresFiltrados = listaFornecedores.filter((fornecedor) =>
-    fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    fornecedor.local.toLowerCase().includes(busca.toLowerCase()) ||
-    fornecedor.produtos.some((p) => p.toLowerCase().includes(busca.toLowerCase()))
-  );
+  const categorias = ['Todos', 'Orgânico', 'Agroecológico'];
 
-  // Ao clicar no fornecedor, abre o mapa no aplicativo com o endereço da descrição
-  const handleAbrirNoMapaDoApp = (fornecedor) => {
+  const fornecedoresFiltrados = FORNECEDORES.filter((f) => {
+    const matchBusca =
+      f.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      f.tipo.toLowerCase().includes(busca.toLowerCase()) ||
+      f.endereco.toLowerCase().includes(busca.toLowerCase()) ||
+      f.produtos.some((p) => p.toLowerCase().includes(busca.toLowerCase()));
+
+    if (categoriaAtiva === 'Todos') return matchBusca;
+    return matchBusca && f.categoria === categoriaAtiva;
+  });
+
+  const handleAbrirDetalhes = (fornecedor) => {
     if (navigation && navigation.navigate) {
-      navigation.navigate('Rastreabilidade', { fornecedor });
+      navigation.navigate('SupplierDetail', { fornecedor });
     }
   };
 
-  // Abre diretamente no Google Maps externo pesquisando apenas pelo endereço
-  const handleAbrirNoGoogleMapsExterno = async (fornecedor) => {
-    const query = encodeURIComponent(fornecedor.local);
-    const url = Platform.select({
-      ios: `maps:0,0?q=${query}`,
-      android: `geo:0,0?q=${query}`,
-      default: `https://www.google.com/maps/search/?api=1&query=${query}`,
-    });
-
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert('Erro', 'Não foi possível abrir o Google Maps.');
-      }
-    } catch (e) {
-      Alert.alert('Erro', 'Ocorreu um erro ao abrir o mapa.');
-    }
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Cabeçalho Verde */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation && navigation.goBack && navigation.goBack()}
-          style={styles.backButton}
-          accessibilityLabel="Voltar"
-          accessibilityRole="button"
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Catálogo de{'\n'}Fornecedores</Text>
+  const renderSupplierItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.85}
+      onPress={() => handleAbrirDetalhes(item)}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver detalhes de ${item.nome}`}
+    >
+      {/* Imagem / Logo Circular */}
+      <View style={styles.avatarContainer}>
+        <Image source={item.imagemAvatar} style={styles.avatarImage} />
       </View>
 
-      <FlatList
-        data={fornecedoresFiltrados}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <>
-            {/* Barra de Pesquisa */}
-            <View style={styles.searchContainer}>
-              <Feather name="search" size={20} color="#666" style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar fornecedor por nome, produto ou endereço..."
-                placeholderTextColor="#888"
-                value={busca}
-                onChangeText={setBusca}
-                accessibilityLabel="Buscar fornecedor"
-              />
-            </View>
+      {/* Informações Centrais */}
+      <View style={styles.infoContainer}>
+        <Text style={styles.supplierName}>{item.nome}</Text>
+        <Text style={styles.supplierType}>{item.tipo}</Text>
+        <View style={styles.metaRow}>
+          <Text style={styles.metaDistance}>{item.distancia}</Text>
+          <View style={styles.metaRating}>
+            <Ionicons name="star" size={13} color={COLORS.star} />
+            <Text style={styles.ratingText}>{item.avaliacao}</Text>
+          </View>
+        </View>
+      </View>
 
-            <Text style={styles.helperText}>
-              Toque em qualquer fornecedor para abrir a localização e o endereço no mapa do aplicativo.
-            </Text>
-          </>
-        }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            activeOpacity={0.88}
-            onPress={() => handleAbrirNoMapaDoApp(item)}
-            accessibilityLabel={`Abrir localização de ${item.nome} no mapa`}
-            accessibilityRole="button"
-          >
-            <Image source={item.imagemCapa} style={styles.cardImage} />
+      {/* Seta Chevron Indicativa */}
+      <Ionicons name="chevron-forward" size={18} color="#A0AFA6" style={styles.chevron} />
+    </TouchableOpacity>
+  );
 
-            <View style={styles.cardInfo}>
-              <View style={styles.cardTopRow}>
-                <Text style={styles.cardTitle} numberOfLines={2}>
-                  {item.nome}
-                </Text>
-              </View>
-
-              <View style={styles.badgeContainer}>
-                <Text style={styles.badgeText}>{item.tipo}</Text>
-              </View>
-
-              {/* Endereço na descrição */}
-              <View style={styles.infoRow}>
-                <Ionicons name="location" size={15} color="#00875f" style={{ marginRight: 5 }} />
-                <Text style={styles.addressText} numberOfLines={2}>
-                  {item.local}
-                </Text>
-              </View>
-
-              {/* Telefone */}
-              <View style={styles.infoRow}>
-                <Feather name="phone" size={13} color="#666" style={{ marginRight: 5 }} />
-                <Text style={styles.infoText}>{item.contato}</Text>
-              </View>
-
-              {/* Botão de ação para abrir o mapa com o endereço */}
-              <View style={styles.cardActionsRow}>
-                <TouchableOpacity
-                  style={styles.openMapBadge}
-                  onPress={() => handleAbrirNoMapaDoApp(item)}
-                  accessibilityLabel="Ver no Mapa do App"
-                  accessibilityRole="button"
-                >
-                  <Ionicons name="map" size={14} color="#00875f" style={{ marginRight: 4 }} />
-                  <Text style={styles.openMapText}>Ver no Mapa</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.openExternalMapBtn}
-                  onPress={() => handleAbrirNoGoogleMapsExterno(item)}
-                  accessibilityLabel="Abrir no Google Maps"
-                  accessibilityRole="button"
-                >
-                  <Ionicons name="open-outline" size={14} color="#555" style={{ marginRight: 3 }} />
-                  <Text style={styles.openExternalMapText}>Google Maps</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      {/* Header Verde #0A6B3A */}
+      <HeaderBar
+        title="Fornecedores"
+        showBack={navigation && navigation.canGoBack()}
+        onBack={() => navigation.goBack()}
+        rightIcon="search-outline"
       />
+
+      <View style={styles.container}>
+        {/* Barra de Busca */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search-outline" size={18} color="#7E8F85" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar por nome ou especialidade..."
+              placeholderTextColor="#90A197"
+              value={busca}
+              onChangeText={setBusca}
+            />
+          </View>
+        </View>
+
+        {/* Filtros em Pílulas (Todos, Orgânico, Agroecológico) */}
+        <View style={styles.filterRow}>
+          {categorias.map((cat) => {
+            const isActive = categoriaAtiva === cat;
+            return (
+              <TouchableOpacity
+                key={cat}
+                onPress={() => setCategoriaAtiva(cat)}
+                style={[styles.filterChip, isActive && styles.filterChipActive]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    isActive && styles.filterChipTextActive,
+                  ]}
+                >
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Lista de Fornecedores */}
+        <FlatList
+          data={fornecedoresFiltrados}
+          keyExtractor={(item) => item.id}
+          renderItem={renderSupplierItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Ionicons name="leaf-outline" size={42} color="#A7B9B0" />
+              <Text style={styles.emptyText}>Nenhum fornecedor encontrado.</Text>
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f6f8' },
-  header: {
-    backgroundColor: '#00875f',
-    paddingHorizontal: 16,
-    paddingVertical: 18,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
   },
-  backButton: { marginBottom: 8 },
-  headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: 'bold', lineHeight: 28 },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   searchContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 8,
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 999,
     paddingHorizontal: 14,
-    height: 50,
-    marginBottom: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#DFE8E3',
   },
-  searchIcon: { marginRight: 10 },
-  searchInput: { flex: 1, fontSize: 14, color: '#333' },
-  helperText: {
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.textDark,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D7E3DC',
+    marginRight: 8,
+  },
+  filterChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  filterChipText: {
     fontSize: 12,
-    color: '#666',
-    marginBottom: 16,
-    marginLeft: 4,
+    fontWeight: '600',
+    color: '#57675E',
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 20,
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 14,
-    marginBottom: 14,
-    elevation: 2,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E3ECE6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
   },
-  cardImage: { width: 85, height: 85, borderRadius: 12, backgroundColor: '#eee' },
-  cardInfo: { flex: 1, marginLeft: 14, justifyContent: 'space-between' },
-  cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { fontSize: 15, fontWeight: 'bold', color: '#111', flex: 1 },
-  badgeContainer: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#e1f5fe',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 14,
-    marginVertical: 4,
+  avatarContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#EDF5F0',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#DCE8E1',
+    marginRight: 12,
   },
-  badgeText: { fontSize: 10.5, fontWeight: 'bold', color: '#0288d1' },
-  infoRow: { flexDirection: 'row', alignItems: 'flex-start', marginVertical: 2 },
-  addressText: { fontSize: 12, color: '#333', fontWeight: '500', flex: 1, lineHeight: 16 },
-  infoText: { fontSize: 12, color: '#666' },
-  cardActionsRow: {
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  infoContainer: {
+    flex: 1,
+  },
+  supplierName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.textDark,
+    marginBottom: 2,
+  },
+  supplierType: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginBottom: 4,
+  },
+  metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    gap: 8,
   },
-  openMapBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e8f5e9',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  openMapText: {
-    fontSize: 11.5,
-    fontWeight: 'bold',
-    color: '#00875f',
-  },
-  openExternalMapBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  openExternalMapText: {
-    fontSize: 11.5,
-    color: '#555',
+  metaDistance: {
+    fontSize: 11,
+    color: '#718379',
     fontWeight: '600',
+    marginRight: 12,
+  },
+  metaRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    fontSize: 11,
+    color: COLORS.textDark,
+    fontWeight: '700',
+    marginLeft: 3,
+  },
+  chevron: {
+    marginLeft: 8,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#819389',
   },
 });

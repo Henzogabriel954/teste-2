@@ -11,222 +11,169 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
-import { FarmContext } from './farmContext'; // Importando o contexto global
+import { Ionicons } from '@expo/vector-icons';
+import { FarmContext } from './farmContext';
+import COLORS from './theme/colors';
+import HortaLogo from './components/HortaLogo';
+import PrimaryButton from './components/PrimaryButton';
+import SecondaryButton from './components/SecondaryButton';
 
 export default function LoginScreen({ navigation }) {
-  // Consumindo o contexto do produtor/usuário
-  const { setProducer } = useContext(FarmContext);
+  const { setProducer } = useContext(FarmContext) || {};
 
-  // Estados de controle da interface
-  const [perfil, setPerfil] = useState('consumidor'); // 'consumidor' ou 'instituicao'
   const [modo, setModo] = useState('entrar'); // 'entrar' ou 'cadastrar'
-  const [secureText, setSecureText] = useState(true);
-
-  // Estados dos inputs
-  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [nome, setNome] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleAcaoPrincipal = () => {
-    // Validação básica do email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email)) {
-      Alert.alert('Email inválido', 'Por favor, insira um email válido.');
-      return;
-    }
-    if (modo === 'cadastrar' && senha.length < 6) {
-      Alert.alert('Senha fraca', 'A senha deve ter no mínimo 6 caracteres.');
+  const handleEntrar = () => {
+    if (email && !email.includes('@')) {
+      Alert.alert('Email inválido', 'Por favor insira um endereço de e-mail válido.');
       return;
     }
 
-    // Salvando os dados no contexto global antes de navegar
-    setProducer({
-      nome: nome || (perfil === 'consumidor' ? 'Produtor Rural' : 'Instituição Parceira'),
-      email: email || 'usuario@nestleaf.com',
-      tipoPerfil: perfil,
-    });
+    if (setProducer) {
+      setProducer({
+        nome: nome || 'Nome Alunila',
+        email: email || 'namealunila@gmail.com',
+        tipoPerfil: 'consumidor',
+      });
+    }
 
-    // Ao entrar ou cadastrar com sucesso, navega para a tela de Perfil
+    // Navega para as abas principais (Início/Mapa/Fornecedores/QR/Perfil)
     if (navigation && navigation.navigate) {
-      navigation.navigate('Perfil');
+      navigation.navigate('MainTabs');
     }
   };
 
+  const handleEsqueceuSenha = () => {
+    Alert.alert(
+      'Redefinição de Senha',
+      'Um link de recuperação será enviado para o seu e-mail cadastrado.'
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, width: '100%' }}
+        style={{ flex: 1 }}
       >
         <ScrollView
-          style={{ flex: 1, width: '100%' }}
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          
-          {/* Cabeçalho Verde */}
+          {/* Logo e Cabeçalho */}
           <View style={styles.headerContainer}>
-            <Text style={styles.headerBrand}>NEST_LEAF</Text>
-            <Text style={styles.headerTitle}>HORTA 4.0</Text>
-            <Text style={styles.headerSubtitle}>
-              Sustentabilidade e rastreabilidade do campo à mesa
+            <HortaLogo size={120} />
+            <Text style={styles.brandTitle}>Horta 4.0</Text>
+            <Text style={styles.brandSubtitle}>
+              Rastreabilidade, pegada de carbono e consumo consciente.
             </Text>
           </View>
 
-          {/* Caixa Branca Principal */}
-          <View style={styles.cardContainer}>
-            
-            {/* Seletor de Perfil */}
-            <Text style={styles.sectionLabel}>Qual é o seu perfil?</Text>
-            <View style={styles.profileRow}>
-              <TouchableOpacity
-                style={[
-                  styles.profileBtn,
-                  perfil === 'consumidor' && styles.profileBtnActive,
-                ]}
-                onPress={() => setPerfil('consumidor')}
-              >
+          {/* Formulário */}
+          <View style={styles.formContainer}>
+            {modo === 'cadastrar' && (
+              <View style={styles.inputWrapper}>
                 <Ionicons
                   name="person-outline"
                   size={20}
-                  color={perfil === 'consumidor' ? '#fff' : '#00875f'}
+                  color={COLORS.textMuted}
+                  style={styles.inputIcon}
                 />
-                <Text
-                  style={[
-                    styles.profileText,
-                    perfil === 'consumidor' && styles.profileTextActive,
-                  ]}
-                >
-                  Consumidor
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.profileBtn,
-                  perfil === 'instituicao' && styles.profileBtnActive,
-                ]}
-                onPress={() => setPerfil('instituicao')}
-              >
-                <MaterialCommunityIcons
-                  name="bank-outline"
-                  size={20}
-                  color={perfil === 'instituicao' ? '#fff' : '#00875f'}
-                />
-                <Text
-                  style={[
-                    styles.profileTextInst,
-                    perfil === 'instituicao' && styles.profileTextActive,
-                  ]}
-                >
-                  Instituição (ONG, Escola, Prefeitura)
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Alternância Entrar / Cadastrar */}
-            <View style={styles.tabRow}>
-              <TouchableOpacity
-                style={[styles.tabBtn, modo === 'entrar' && styles.tabBtnActive]}
-                onPress={() => setModo('entrar')}
-              >
-                <Text
-                  style={[styles.tabText, modo === 'entrar' && styles.tabTextActive]}
-                >
-                  Entrar
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.tabBtn, modo === 'cadastrar' && styles.tabBtnActive]}
-                onPress={() => setModo('cadastrar')}
-              >
-                <Text
-                  style={[styles.tabText, modo === 'cadastrar' && styles.tabTextActive]}
-                >
-                  Cadastrar
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Campos de Formulário */}
-            {modo === 'cadastrar' && (
-              <View style={styles.inputBox}>
-                <Ionicons name="person-outline" size={20} color="#555" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Nome completo"
-                  placeholderTextColor="#888"
+                  placeholder="Seu nome completo"
+                  placeholderTextColor="#9AA8A0"
                   value={nome}
                   onChangeText={setNome}
-                  accessibilityLabel="Nome completo"
+                  autoCapitalize="words"
                 />
               </View>
             )}
 
-            <View style={styles.inputBox}>
-              <Ionicons name="mail-outline" size={20} color="#555" style={styles.inputIcon} />
+            {/* Input Email */}
+            <View style={styles.inputWrapper}>
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color={COLORS.textMuted}
+                style={styles.inputIcon}
+              />
               <TextInput
                 style={styles.input}
                 placeholder="Email ou nome@gmail.com"
-                placeholderTextColor="#888"
+                placeholderTextColor="#9AA8A0"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
                 value={email}
                 onChangeText={setEmail}
-                autoCapitalize="none"
-                autoComplete="email"
-                keyboardType="email-address"
-                accessibilityLabel="Email"
               />
             </View>
 
-            <View style={styles.inputBox}>
-              <Ionicons name="lock-closed-outline" size={20} color="#555" style={styles.inputIcon} />
+            {/* Input Senha */}
+            <View style={styles.inputWrapper}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={COLORS.textMuted}
+                style={styles.inputIcon}
+              />
               <TextInput
-                style={styles.input}
-                placeholder={modo === 'cadastrar' ? 'Crie uma senha' : 'Password'}
-                placeholderTextColor="#888"
-                secureTextEntry={secureText}
+                style={[styles.input, { paddingRight: 40 }]}
+                placeholder="Senha"
+                placeholderTextColor="#9AA8A0"
+                secureTextEntry={!showPassword}
                 value={senha}
                 onChangeText={setSenha}
-                autoCapitalize="none"
-                autoComplete="password"
-                accessibilityLabel="Senha"
               />
               <TouchableOpacity
-                onPress={() => setSecureText(!secureText)}
-                accessibilityLabel={secureText ? 'Mostrar senha' : 'Ocultar senha'}
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
                 accessibilityRole="button"
+                accessibilityLabel="Mostrar ou ocultar senha"
               >
                 <Ionicons
-                  name={secureText ? 'eye-outline' : 'eye-off-outline'}
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color="#555"
+                  color={COLORS.textMuted}
                 />
               </TouchableOpacity>
             </View>
 
-            {/* Botão de Ação Principal */}
-            <TouchableOpacity style={styles.mainButton} onPress={handleAcaoPrincipal}>
-              <Text style={styles.mainButtonText}>
-                {modo === 'entrar' ? 'ENTRAR' : 'CRIAR CONTA'}
-              </Text>
-            </TouchableOpacity>
+            {/* Botão Entrar / Cadastrar */}
+            <PrimaryButton
+              title={modo === 'entrar' ? 'ENTRAR' : 'CADASTRAR'}
+              onPress={handleEntrar}
+              style={styles.mainButton}
+            />
 
-            {/* Divisor "ou" */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.line} />
-              <Text style={styles.orText}>ou</Text>
-              <View style={styles.line} />
+            {/* Divisor "Ou" */}
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>Ou</Text>
+              <View style={styles.dividerLine} />
             </View>
 
-            {/* Botão Login com Google */}
-            <TouchableOpacity style={styles.googleButton} onPress={handleAcaoPrincipal}>
-              <FontAwesome name="google" size={18} color="#ea4335" style={{ marginRight: 10 }} />
-              <Text style={styles.googleButtonText}>Login com Google</Text>
-            </TouchableOpacity>
+            {/* Botão Criar uma conta / Já tenho conta */}
+            <SecondaryButton
+              title={modo === 'entrar' ? 'Criar uma conta' : 'Já tenho uma conta'}
+              onPress={() => setModo(modo === 'entrar' ? 'cadastrar' : 'entrar')}
+              style={styles.secondaryButton}
+            />
 
+            {/* Esqueceu sua senha? */}
+            <TouchableOpacity
+              onPress={handleEsqueceuSenha}
+              style={styles.forgotContainer}
+              accessibilityRole="button"
+            >
+              <Text style={styles.forgotText}>Esqueceu sua senha?</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -235,141 +182,50 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: COLORS.background,
   },
   scrollContent: {
     flexGrow: 1,
-    width: '100%',
-    paddingBottom: 40,
-    alignItems: 'center',
+    paddingHorizontal: 28,
+    paddingTop: 36,
+    paddingBottom: 24,
+    justifyContent: 'center',
   },
   headerContainer: {
-    width: '100%',
-    backgroundColor: '#00875f',
-    paddingTop: 40,
-    paddingBottom: 50,
     alignItems: 'center',
-    borderBottomLeftRadius: 36,
-    borderBottomRightRadius: 36,
+    marginBottom: 32,
+  },
+  brandTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: COLORS.primary,
+    marginTop: 14,
+    letterSpacing: 0.5,
+  },
+  brandSubtitle: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: 6,
+    lineHeight: 18,
     paddingHorizontal: 20,
   },
-  headerBrand: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-    marginBottom: 8,
+  formContainer: {
+    width: '100%',
   },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: '900',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    color: '#e2f0d9',
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  cardContainer: {
-    width: '90%',
-    marginTop: -25,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  sectionLabel: {
-    textAlign: 'center',
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 12,
-    fontWeight: '500',
-  },
-  profileRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    gap: 10,
-  },
-  profileBtn: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fafafa',
-  },
-  profileBtnActive: {
-    backgroundColor: '#00875f',
-    borderColor: '#00875f',
-  },
-  profileText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#00875f',
-    marginTop: 6,
-  },
-  profileTextInst: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#00875f',
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  profileTextActive: {
-    color: '#fff',
-  },
-  tabRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f1f3f5',
-    borderRadius: 10,
-    padding: 4,
-    marginBottom: 20,
-  },
-  tabBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  tabBtnActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  tabText: {
-    fontSize: 14,
-    color: '#777',
-    fontWeight: '600',
-  },
-  tabTextActive: {
-    color: '#00875f',
-    fontWeight: 'bold',
-  },
-  inputBox: {
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#DFE8E3',
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    height: 52,
     marginBottom: 14,
-    backgroundColor: '#fafafa',
-    height: 50,
+    position: 'relative',
   },
   inputIcon: {
     marginRight: 10,
@@ -377,56 +233,46 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
-    color: '#333',
+    color: COLORS.textDark,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    padding: 4,
   },
   mainButton: {
-    backgroundColor: '#0f2c59',
-    borderRadius: 12,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginTop: 6,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    height: 50,
   },
-  mainButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
-  },
-  dividerContainer: {
+  dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginVertical: 20,
   },
-  line: {
+  dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#DEE7E2',
   },
-  orText: {
-    marginHorizontal: 10,
-    color: '#888',
+  dividerText: {
+    marginHorizontal: 14,
     fontSize: 13,
-  },
-  googleButton: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  googleButtonText: {
-    color: '#333',
-    fontSize: 14,
+    color: '#8A9990',
     fontWeight: '600',
+  },
+  secondaryButton: {
+    height: 50,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#C5D8CD',
+  },
+  forgotContainer: {
+    alignItems: 'center',
+    marginTop: 22,
+    paddingVertical: 6,
+  },
+  forgotText: {
+    fontSize: 13,
+    color: '#657B6F',
+    fontWeight: '500',
   },
 });

@@ -1,325 +1,261 @@
-import React, { useState, useContext } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  ScrollView, 
-  TextInput, 
-  TouchableOpacity, 
-  Platform 
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { FarmContext } from './farmContext';
+import COLORS from './theme/colors';
+import HeaderBar from './components/HeaderBar';
+import PrimaryButton from './components/PrimaryButton';
 
 export default function PegadaCarbonoScreen({ navigation }) {
-  const { carbonPoints } = useContext(FarmContext) || {};
-  // Estados para os inputs interativos
-  const [transporte, setTransporte] = useState(50);
-  const [energia, setEnergia] = useState(30);
+  const [detalheCategoria, setDetalheCategoria] = useState(null);
 
-  // Cálculo fictício proporcional baseado nos sliders
-  const emissaoTotal = (Number(transporte) * 0.5 + Number(energia) * 0.4).toFixed(1);
-  const percentTransporte = Math.round((transporte * 0.5 / (emissaoTotal > 0 ? emissaoTotal : 1)) * 100);
-  const percentEnergia = 100 - percentTransporte;
+  const categorias = [
+    {
+      id: 'alimentacao',
+      nome: 'Alimentação',
+      valor: '1,2 tCO₂e',
+      iconName: 'food-apple-outline',
+      iconType: 'material',
+      dica: 'Consumir alimentos locais de hortas agroecológicas reduz a pegada de transporte e refrigeração em até 30%.',
+    },
+    {
+      id: 'transporte',
+      nome: 'Transporte',
+      valor: '0,6 tCO₂e',
+      iconName: 'car-outline',
+      iconType: 'ionicons',
+      dica: 'Priorize caminhada, bicicleta ou transporte coletivo para deslocamentos curtos na sua região.',
+    },
+    {
+      id: 'energia',
+      nome: 'Energia',
+      valor: '0,4 tCO₂e',
+      iconName: 'flash-outline',
+      iconType: 'ionicons',
+      dica: 'Aproveite a luz solar natural e utilize lâmpadas LED de alta eficiência energética.',
+    },
+    {
+      id: 'residuos',
+      nome: 'Resíduos',
+      valor: '0,2 tCO₂e',
+      iconName: 'trash-outline',
+      iconType: 'ionicons',
+      dica: 'A compostagem doméstica de restos orgânicos evita a emissão de gás metano em aterros.',
+    },
+  ];
 
-  const handleVoltar = () => {
-    if (navigation && navigation.canGoBack && navigation.canGoBack()) {
-      navigation.goBack();
-    } else if (navigation && navigation.navigate) {
-      navigation.navigate('Perfil');
-    }
+  const handleVerDicas = () => {
+    Alert.alert(
+      'Dicas de Redução de Carbono',
+      '1. Compre direto de produtores da Horta 4.0\n2. Realize compostagem de restos de alimentos\n3. Evite sacolas plásticas de uso único\n4. Reduza o desperdício alimentar planejando suas refeições.'
+    );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        
-        {/* Cabeçalho */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={handleVoltar}
-            style={styles.backButton}
-            accessibilityLabel="Voltar"
-            accessibilityRole="button"
-          >
-            <Ionicons name="arrow-back" size={24} color="#FFF" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Pegada de Carbono</Text>
-        </View>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      {/* Header Verde #0A6B3A */}
+      <HeaderBar
+        title="Pegada de Carbono"
+        showBack={navigation && navigation.canGoBack()}
+        onBack={() => navigation.goBack()}
+      />
 
-        {/* Card de Boas-Vindas / Impacto */}
-        <View style={styles.welcomeCard}>
-          <Text style={styles.welcomeTitle}>Calcule seu Impacto</Text>
-          <Text style={styles.welcomeSubtitle}>
-            Monitore as emissões da sua produção para um futuro mais verde.
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Título e Subtítulo da Tela */}
+        <View style={styles.introHeader}>
+          <Text style={styles.pageTitle}>Calcule sua pegada de carbono</Text>
+          <Text style={styles.pageSubtitle}>
+            Entenda o impacto das suas escolhas no meio ambiente.
           </Text>
-          <Text style={{ color: '#4ADE80', fontWeight: 'bold', marginTop: 10 }}>
-            🌱 Saldo Ecológico: {carbonPoints || 150} pontos
-          </Text>
-          <View style={styles.iconContainer}>
-            <Ionicons name="globe-outline" size={28} color="#4ADE80" />
-          </View>
         </View>
 
-        {/* Card de Controles (Sliders e Inputs) */}
-        <View style={styles.card}>
-          {/* Transporte */}
-          <View style={styles.inputGroup}>
-            <View style={styles.labelRow}>
-              <Text style={styles.label}>Transporte (Km/semana)</Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{transporte} Km</Text>
-              </View>
+        {/* Card Destaque: Seu Impacto (2,4 tCO₂e/ano e -10%) */}
+        <View style={styles.impactCard}>
+          <View style={styles.impactHeader}>
+            <View style={styles.leafIconCircle}>
+              <Ionicons name="leaf" size={24} color={COLORS.primary} />
             </View>
-            
-            {/* Simulação visual do Slider */}
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={String(transporte)}
-              onChangeText={(val) => setTransporte(val.replace(/[^0-9]/g, ''))}
-              accessibilityLabel="Transporte em quilômetros por semana"
-            />
-          </View>
-
-          {/* Energia */}
-          <View style={styles.inputGroup}>
-            <View style={styles.labelRow}>
-              <Text style={styles.label}>Energia (Consumo mensal)</Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{energia} kwh</Text>
-              </View>
-            </View>
-
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={String(energia)}
-              onChangeText={(val) => setEnergia(val.replace(/[^0-9]/g, ''))}
-              accessibilityLabel="Consumo mensal de energia em kWh"
-            />
-          </View>
-        </View>
-
-        {/* Card de Emissão Estimada */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Emissão Estimada</Text>
-          
-          <View style={styles.resultContainer}>
-            {/* Gráfico circular simulado */}
-            <View style={styles.circleGraph}>
-              <Text style={styles.circleValue}>{emissaoTotal}</Text>
-              <Text style={styles.circleUnit}>kg/ano</Text>
-            </View>
-
-            <View style={styles.statsBreakdown}>
-              <View style={styles.statItem}>
-                <Text style={styles.statPercent}>{isNaN(percentTransporte) ? 0 : percentTransporte}%</Text>
-                <Text style={styles.statLabel}>Transporte</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statPercent}>{isNaN(percentEnergia) ? 0 : percentEnergia}%</Text>
-                <Text style={styles.statLabel}>Energia</Text>
-              </View>
+            <View>
+              <Text style={styles.impactLabel}>Seu impacto</Text>
+              <Text style={styles.impactValue}>2,4 tCO₂e/ano</Text>
             </View>
           </View>
 
-          <View style={styles.statusAlert}>
-            <Text style={styles.statusAlertText}>
-              Sua emissão é considerada <Text style={{ fontWeight: 'bold' }}>Moderada.</Text>
-            </Text>
+          {/* Badge Comparativo */}
+          <View style={styles.comparisonBadge}>
+            <Text style={styles.comparisonBadgeText}>-10% que a média nacional</Text>
           </View>
         </View>
 
-        {/* Dicas para Reduzir */}
-        <View style={styles.tipsSection}>
-          <Text style={styles.sectionTitle}>Dicas para Reduzir</Text>
-          
-          <View style={styles.tipRow}>
-            <MaterialCommunityIcons name="bike" size={24} color="#064E3B" style={styles.tipIcon} />
-            <Text style={styles.tipText}>Utilize entregas consolidadas para reduzir viagens.</Text>
-          </View>
+        {/* Lista de Categorias de Emissão */}
+        <View style={styles.categoriesList}>
+          {categorias.map((cat) => (
+            <TouchableOpacity
+              key={cat.id}
+              style={styles.categoryCard}
+              activeOpacity={0.75}
+              onPress={() => {
+                setDetalheCategoria(cat);
+                Alert.alert(`${cat.nome} (${cat.valor})`, cat.dica);
+              }}
+              accessibilityRole="button"
+            >
+              <View style={styles.categoryLeft}>
+                <View style={styles.categoryIconCircle}>
+                  {cat.iconType === 'material' ? (
+                    <MaterialCommunityIcons name={cat.iconName} size={20} color={COLORS.primary} />
+                  ) : (
+                    <Ionicons name={cat.iconName} size={20} color={COLORS.primary} />
+                  )}
+                </View>
+                <View>
+                  <Text style={styles.categoryName}>{cat.nome}</Text>
+                  <Text style={styles.categoryValue}>{cat.valor}</Text>
+                </View>
+              </View>
 
-          <View style={styles.tipRow}>
-            <MaterialCommunityIcons name="solar-panel" size={24} color="#064E3B" style={styles.tipIcon} />
-            <Text style={styles.tipText}>Invista em energia solar para o manejo dos lotes.</Text>
-          </View>
+              <Ionicons name="chevron-forward" size={18} color="#9DB0A5" />
+            </TouchableOpacity>
+          ))}
         </View>
 
+        {/* Botão Ver Dicas de Redução */}
+        <PrimaryButton
+          title="Ver dicas de redução"
+          onPress={handleVerDicas}
+          style={styles.tipsButton}
+        />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: COLORS.primary,
   },
-  scrollContainer: {
-    padding: 16,
-    paddingBottom: 40,
+  scrollContent: {
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 18,
+    paddingTop: 20,
+    paddingBottom: 28,
   },
-  header: {
-    backgroundColor: '#064E3B',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    marginBottom: 16,
+  introHeader: {
+    marginBottom: 20,
   },
-  backButton: {
-    marginRight: 12,
-  },
-  headerTitle: {
-    color: '#FFF',
+  pageTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-  },
-  welcomeCard: {
-    backgroundColor: '#0B192C',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    position: 'relative',
-  },
-  welcomeTitle: {
-    color: '#FFF',
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '800',
+    color: COLORS.textDark,
     marginBottom: 6,
   },
-  welcomeSubtitle: {
-    color: '#9CA3AF',
-    fontSize: 14,
-    lineHeight: 20,
-    width: '80%',
+  pageSubtitle: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    lineHeight: 18,
   },
-  iconContainer: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
+  impactCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#DFE9E3',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  card: {
-    backgroundColor: '#FFF',
+  impactHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  leafIconCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#EAF6EF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  impactLabel: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    fontWeight: '500',
+  },
+  impactValue: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: COLORS.primary,
+    marginTop: 2,
+  },
+  comparisonBadge: {
+    backgroundColor: '#E7F5ED',
+    alignSelf: 'flex-start',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+  comparisonBadgeText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  categoriesList: {
+    marginBottom: 24,
+  },
+  categoryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E2ECE6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: { ios: 0.1, android: 0.2 }[Platform.OS] || 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  labelRow: {
+  categoryLeft: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  label: {
+  categoryIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#EEF7F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  categoryName: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: COLORS.textDark,
   },
-  badge: {
-    backgroundColor: '#0A3981',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeText: {
-    color: '#FFF',
+  categoryValue: {
     fontSize: 12,
-    fontWeight: 'bold',
+    color: COLORS.textMuted,
+    marginTop: 2,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: '#1F2937',
-    backgroundColor: '#FAFAFA',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 12,
-  },
-  resultContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  circleGraph: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    borderWidth: 8,
-    borderColor: '#D97706',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  circleValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1F2937',
-  },
-  circleUnit: {
-    fontSize: 12,
-    color: '#4B5563',
-  },
-  statsBreakdown: {
-    justifyContent: 'center',
-  },
-  statItem: {
-    marginBottom: 8,
-  },
-  statPercent: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  statusAlert: {
-    backgroundColor: '#FEF3C7',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  statusAlertText: {
-    color: '#92400E',
-    fontSize: 13,
-  },
-  tipsSection: {
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    padding: 16,
-  },
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  tipIcon: {
-    marginRight: 12,
-  },
-  tipText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#4B5563',
-    lineHeight: 18,
+  tipsButton: {
+    height: 50,
   },
 });

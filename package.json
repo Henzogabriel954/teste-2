@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "expo start"
+    "start": "node -r ./url-polyfill.js ./node_modules/expo/bin/cli start",
+    "android": "node -r ./url-polyfill.js ./node_modules/expo/bin/cli start --android",
+    "ios": "node -r ./url-polyfill.js ./node_modules/expo/bin/cli start --ios",
+    "web": "node -r ./url-polyfill.js ./node_modules/expo/bin/cli start --web",
+    "postinstall": "node patch-expo-cli.js"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~58.0.16",
+    "@expo/metro-runtime": "~58.0.17",
     "@expo/vector-icons": "^15.0.2",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
-    "expo": "~58.0.22",
+    "expo": "~58.0.23",
     "expo-camera": "~58.0.14",
     "expo-font": "~58.0.11",
     "expo-status-bar": "~58.0.4",
@@ -20,7 +24,7 @@
     "react-native": "0.88.1",
     "react-native-maps": "1.29.11",
     "react-native-qrcode-svg": "^6.3.24",
-    "react-native-safe-area-context": "~5.10.1",
+    "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1",
     "react-native-svg": "15.16.0",
     "react-native-web": "^0.21.4"

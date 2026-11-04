@@ -67,7 +67,7 @@ export default function LoginScreen({ navigation }) {
         >
           {/* Logo e Cabeçalho */}
           <View style={styles.headerContainer}>
-            <HortaLogo size={120} />
+            <HortaLogo size={140} />
             <Text style={styles.brandTitle}>Horta 4.0</Text>
             <Text style={styles.brandSubtitle}>
               Rastreabilidade, pegada de carbono e consumo consciente.

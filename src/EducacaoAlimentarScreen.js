@@ -20,7 +20,7 @@ export default function EducacaoAlimentarScreen({ navigation }) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
-          <MaterialCommunityIcons name="nutrition" size={32} color="#00875f" />
+          <MaterialCommunityIcons name="nutrition" size={32} color="#0A6B3A" />
           <Text style={styles.cardTitle}>Alimentação Saudável e Consciente</Text>
           <Text style={styles.cardText}>
             Aprenda a valorizar alimentos locais, sazonais e livres de defensivos químicos sintéticos para fortalecer a saúde de toda a comunidade.
@@ -34,7 +34,7 @@ export default function EducacaoAlimentarScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f6f8' },
   header: {
-    backgroundColor: '#00875f',
+    backgroundColor: '#0A6B3A',
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,

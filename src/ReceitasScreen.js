@@ -34,7 +34,7 @@ export default function ReceitasScreen({ navigation }) {
         }
         renderItem={({ item }) => (
           <View style={styles.card} accessibilityLabel={`Receita ${item.titulo}`}>
-            <MaterialCommunityIcons name="silverware-fork-knife" size={24} color="#00875f" />
+            <MaterialCommunityIcons name="silverware-fork-knife" size={24} color="#0A6B3A" />
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{item.titulo}</Text>
               <Text style={styles.cardDetail}>⏱ {item.tempo} • {item.nivel}</Text>
@@ -49,7 +49,7 @@ export default function ReceitasScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f6f8' },
   header: {
-    backgroundColor: '#00875f',
+    backgroundColor: '#0A6B3A',
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,

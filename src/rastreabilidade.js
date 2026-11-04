@@ -168,7 +168,7 @@ export default function RastreabilidadeScreen({ route, navigation }) {
           <View
             style={[
               styles.markerPin,
-              { backgroundColor: '#00875f' },
+              { backgroundColor: '#0A6B3A' },
               fornecedorAtivo?.id === 'kawai' && styles.markerPinActive,
             ]}
           >
@@ -212,7 +212,7 @@ export default function RastreabilidadeScreen({ route, navigation }) {
           accessibilityRole="button"
         >
           <Text style={styles.mapExternalButtonText}>Abrir no Maps</Text>
-          <Ionicons name="open-outline" size={14} color="#00875f" style={{ marginLeft: 4 }} />
+          <Ionicons name="open-outline" size={14} color="#0A6B3A" style={{ marginLeft: 4 }} />
         </TouchableOpacity>
       </View>
 
@@ -236,7 +236,7 @@ export default function RastreabilidadeScreen({ route, navigation }) {
                 <MaterialCommunityIcons
                   name={item.id === 'kawai' ? 'fruit-cherries' : 'sprout'}
                   size={15}
-                  color={isActive ? '#fff' : '#00875f'}
+                  color={isActive ? '#fff' : '#0A6B3A'}
                   style={{ marginRight: 4 }}
                 />
                 <Text style={[styles.topSelectorText, isActive && styles.topSelectorTextActive]}>
@@ -257,13 +257,13 @@ export default function RastreabilidadeScreen({ route, navigation }) {
               <Text style={styles.supplierCardType}>{fornecedorAtivo.tipo}</Text>
             </View>
             <View style={styles.pinBadge}>
-              <Ionicons name="navigate" size={14} color="#00875f" />
+              <Ionicons name="navigate" size={14} color="#0A6B3A" />
             </View>
           </View>
 
           {/* Endereço completo exibido na descrição */}
           <View style={styles.addressBox}>
-            <Ionicons name="location-outline" size={16} color="#00875f" style={{ marginRight: 6 }} />
+            <Ionicons name="location-outline" size={16} color="#0A6B3A" style={{ marginRight: 6 }} />
             <Text style={styles.supplierAddressText}>
               {fornecedorAtivo.local}
             </Text>
@@ -294,7 +294,7 @@ export default function RastreabilidadeScreen({ route, navigation }) {
               accessibilityLabel="Ver registros da horta"
               accessibilityRole="button"
             >
-              <MaterialCommunityIcons name="book-open-outline" size={16} color="#00875f" style={{ marginRight: 4 }} />
+              <MaterialCommunityIcons name="book-open-outline" size={16} color="#0A6B3A" style={{ marginRight: 4 }} />
               <Text style={styles.detailsBtnText}>Ver Horta</Text>
             </TouchableOpacity>
           </View>
@@ -308,7 +308,7 @@ export default function RastreabilidadeScreen({ route, navigation }) {
           accessibilityRole="button"
         >
           <View style={styles.qrIconContainer}>
-            <MaterialCommunityIcons name="camera-iris" size={20} color="#00875f" />
+            <MaterialCommunityIcons name="camera-iris" size={20} color="#0A6B3A" />
           </View>
           <Text style={styles.floatingButtonText}>Escanear QR Code</Text>
         </TouchableOpacity>
@@ -320,10 +320,10 @@ export default function RastreabilidadeScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#00875f',
+    backgroundColor: '#0A6B3A',
   },
   header: {
-    backgroundColor: '#00875f',
+    backgroundColor: '#0A6B3A',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   mapExternalButtonText: {
-    color: '#00875f',
+    color: '#0A6B3A',
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -395,8 +395,8 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
   },
   topSelectorChipActive: {
-    backgroundColor: '#00875f',
-    borderColor: '#00875f',
+    backgroundColor: '#0A6B3A',
+    borderColor: '#0A6B3A',
   },
   topSelectorText: {
     fontSize: 11.5,
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   supplierCardType: {
     fontSize: 11.5,
-    color: '#00875f',
+    color: '#0A6B3A',
     fontWeight: '600',
     marginTop: 1,
   },
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#00875f',
+    backgroundColor: '#0A6B3A',
     paddingVertical: 9,
     borderRadius: 8,
   },
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     borderColor: '#c8e6c9',
   },
   detailsBtnText: {
-    color: '#00875f',
+    color: '#0A6B3A',
     fontSize: 12,
     fontWeight: 'bold',
   },
